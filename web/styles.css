@@ -1,0 +1,416 @@
+/* 全局变量定义 */
+:root {
+    --primary-color: #3498db;    /* 主要颜色 */
+    --secondary-color: #2980b9;  /* 次要颜色 */
+    --background-color: #f5f7fa; /* 背景颜色 */
+    --text-color: #34495e;       /* 文本颜色 */
+    --error-color: #e74c3c;      /* 错误颜色 */
+    --success-color: #3498db;    /* 成功颜色 */
+    --border-color: #bdc3c7;     /* 边框颜色 */
+    --card-background: #ffffff;  /* 卡片背景色 */
+}
+
+/* 基础样式 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* 主应用容器 */
+#app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 导航栏样式 */
+#nav-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    background-color: var(--primary-color);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.nav-button {
+    padding: 10px 20px;
+    background-color: transparent;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1em;
+    border-radius: 5px;
+}
+
+.nav-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 内容区域样式 */
+#content {
+    background-color: var(--card-background);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 头部样式 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.header h2 {
+    color: var(--primary-color);
+}
+
+/* 设置按钮样式 */
+.settings-button {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: color 0.3s;
+}
+
+.settings-button:hover {
+    color: var(--secondary-color);
+}
+
+/* 表单样式 */
+.form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.form input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s;
+}
+
+.form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form button {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1em;
+    border-radius: 5px;
+}
+
+.form button:hover {
+    background-color: var(--secondary-color);
+}
+
+/* 错误和成功消息样式 */
+.error {
+    color: var(--error-color);
+    margin-bottom: 10px;
+}
+
+.success {
+    color: var(--success-color);
+    margin-bottom: 10px;
+}
+
+/* 表格样式 */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    table-layout: fixed;
+}
+
+tr {
+    background-color: var(--card-background);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* 设置每列的宽度 */
+th:nth-child(1), td:nth-child(1) { width: 10%; } /* ID */
+th:nth-child(2), td:nth-child(2) { width: 25%; } /* Key */
+th:nth-child(3), td:nth-child(3) { width: 25%; } /* Code */
+th:nth-child(4), td:nth-child(4) { width: 10%; } /* 状态 */
+th:nth-child(5), td:nth-child(5) { width: 30%; } /* 操作 */
+
+/* 悬停时显示完整内容 */
+td {
+    position: relative;
+}
+td:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background-color: var(--card-background);
+    padding: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    z-index: 1;
+    white-space: normal;
+    word-break: break-all;
+    max-width: 200px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 操作按钮样式 */
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.action-buttons button {
+    padding: 6px 10px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    font-size: 0.85em;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.action-buttons button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.action-buttons button:disabled {
+    background-color: var(--border-color);
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 模态框样式 */
+#settings-modal,
+#isolated-challenge-modal,
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.settings-content,
+.isolated-challenge-content,
+.modal-content {
+    background: var(--card-background);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 400px;
+}
+
+.settings-content h3,
+.isolated-challenge-content h3 {
+    margin-top: 0;
+    color: var(--primary-color);
+}
+
+.settings-content div,
+.isolated-challenge-content div {
+    margin-bottom: 20px;
+}
+
+.settings-content label,
+.isolated-challenge-content label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.settings-content input,
+.isolated-challenge-content input {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s;
+}
+
+.settings-content input:focus,
+.isolated-challenge-content input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.settings-buttons,
+.isolated-challenge-buttons,
+.modal-buttons {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.settings-buttons button,
+.isolated-challenge-buttons button,
+.modal-buttons button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-left: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.settings-buttons button:hover,
+.isolated-challenge-buttons button:hover,
+.modal-buttons button:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.settings-buttons button:last-child,
+.isolated-challenge-buttons button:last-child,
+.modal-buttons button:first-child {
+    background: var(--error-color);
+}
+
+.settings-buttons button:last-child:hover,
+.isolated-challenge-buttons button:last-child:hover,
+.modal-buttons button:first-child:hover {
+    background: #c0392b;
+}
+
+/* 通知样式 */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.notification.error {
+    background-color: var(--error-color);
+}
+
+.notification.success {
+    background-color: var(--success-color);
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+    /* 在小屏幕上改变表格布局 */
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    tr {
+        margin-bottom: 15px;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+        min-height: 30px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    td:before {
+        content: attr(data-label);
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    /* 重置移动端的列宽 */
+    td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5) {
+        width: 100%;
+    }
+
+    /* 修改操作栏的样式 */
+    td:nth-child(5) {
+        padding-left: 6px;
+    }
+
+    td:nth-child(5):before {
+        content: none;
+    }
+
+    .action-buttons {
+        justify-content: flex-start;
+        padding-left: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .action-buttons button {
+        flex: 1 0 calc(50% - 5px);
+        padding: 8px;
+        font-size: 0.9em;
+        margin-top: 5px;
+        white-space: nowrap;
+    }
+}
