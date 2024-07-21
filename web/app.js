@@ -452,37 +452,6 @@ function promptForUniqueName() {
     });
 }
 
-// /**
-//  * 显示分享链接模态框
-//  * @param {string} shareLink - 分享链接
-//  */
-// function showShareLinkModal(shareLink) {
-//     const modal = document.createElement('div');
-//     modal.className = 'modal';
-//     modal.innerHTML = `
-//         <div class="modal-content">
-//             <h3>分享链接</h3>
-//             <div class="share-link-container">
-//                 <input type="text" id="share-link-input" value="${shareLink}" readonly>
-//                 <button onclick="copyShareLink()"><i class="fas fa-copy"></i> 复制</button>
-//             </div>
-//         </div>
-//     `;
-//     modal.onclick = closeModal;
-//     modal.querySelector('.modal-content').onclick = (e) => e.stopPropagation();
-//     document.body.appendChild(modal);
-// }
-
-// /**
-//  * 复制分享链接到剪贴板
-//  */
-// function copyShareLink() {
-//     const shareLinkInput = document.getElementById('share-link-input');
-//     shareLinkInput.select();
-//     document.execCommand('copy');
-//     showSuccess('链接已复制到剪贴板');
-// }
-
 
 /**
  * 显示分享链接模态框
