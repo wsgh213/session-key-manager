@@ -192,6 +192,7 @@ async function fetchSessionKeys() {
                         <button onclick="handleDeleteSessionKey(${sk.id})">删除</button>
                         <button onclick="handleJump(${sk.id}, ${sk.status})" ${sk.status ? '' : 'disabled'}>跳转</button>
                         <button onclick="handleIsolatedChallenge(${sk.id}, ${sk.status})" ${sk.status ? '' : 'disabled'}>隔离跳转</button>
+                        <button onclick="handleShare(${sk.id}, ${sk.status})" ${sk.status ? '' : 'disabled'}>分享</button>
                     </div>
                 </td>
             `;
@@ -262,6 +263,8 @@ function handleDeleteSessionKey(id) {
             </div>
         </div>
     `;
+    modal.onclick = closeModal;
+    modal.querySelector('.modal-content').onclick = (e) => e.stopPropagation();
     document.body.appendChild(modal);
 }
 
@@ -289,6 +292,7 @@ function closeModal() {
         modal.parentNode.removeChild(modal);
     }
 }
+
 /**
  * 处理跳转
  * @param {number} sessionKeyId - Session Key ID
@@ -306,8 +310,6 @@ async function handleJump(sessionKeyId, isActive) {
             base_url: BASE_URL
         });
         
-        console.log('Response:', response);
-
         if (response && response.login_url) {
             window.open(response.login_url, '_blank');
         } else {
@@ -332,6 +334,7 @@ async function handleIsolatedChallenge(sessionKeyId, isActive) {
 
     const modal = document.createElement('div');
     modal.id = 'isolated-challenge-modal';
+    modal.className = 'modal';
     modal.innerHTML = `
         <div class="isolated-challenge-content">
             <h3>隔离跳转</h3>
@@ -341,22 +344,178 @@ async function handleIsolatedChallenge(sessionKeyId, isActive) {
             </div>
             <div class="isolated-challenge-buttons">
                 <button onclick="executeIsolatedChallenge(${sessionKeyId})">确定</button>
-                <button onclick="closeIsolatedChallengeModal()">取消</button>
+                <button onclick="closeModal()">取消</button>
             </div>
         </div>
     `;
+    modal.onclick = closeModal;
+    modal.querySelector('.isolated-challenge-content').onclick = (e) => e.stopPropagation();
     document.body.appendChild(modal);
 }
 
 /**
- * 关闭隔离跳转模态框
+ * 处理分享
+ * @param {number} sessionKeyId - Session Key ID
+ * @param {boolean} isActive - Session Key是否激活
  */
-function closeIsolatedChallengeModal() {
-    const modal = document.getElementById('isolated-challenge-modal');
-    if (modal) {
-        modal.parentNode.removeChild(modal);
+function handleShare(sessionKeyId, isActive) {
+    if (!isActive) {
+        showError('无法分享：Session Key 未激活');
+        return;
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>选择分享类型</h3>
+            <div class="share-options">
+                <button onclick="generateShareLink(${sessionKeyId}, 'normal')">普通分享</button>
+                <button onclick="generateShareLink(${sessionKeyId}, 'isolated')">隔离分享</button>
+            </div>
+        </div>
+    `;
+    modal.onclick = closeModal;
+    modal.querySelector('.modal-content').onclick = (e) => e.stopPropagation();
+    document.body.appendChild(modal);
+}
+
+/**
+ * 生成分享链接
+ * @param {number} sessionKeyId - Session Key ID
+ * @param {string} shareType - 分享类型 ('normal' 或 'isolated')
+ */
+async function generateShareLink(sessionKeyId, shareType) {
+    closeModal();
+
+    let uniqueName = '';
+    if (shareType === 'isolated') {
+        uniqueName = await promptForUniqueName();
+        if (!uniqueName) return; // 用户取消了操作
+    }
+
+    try {
+        const response = await apiRequest('post', '/auth/oauth_token', {
+            session_key_id: sessionKeyId,
+            base_url: BASE_URL,
+            ...(shareType === 'isolated' && { unique_name: uniqueName })
+        });
+
+        if (response && response.login_url) {
+            showShareLinkModal(response.login_url);
+        } else {
+            throw new Error('响应中没有包含 login_url');
+        }
+    } catch (error) {
+        console.error('Share link generation error:', error);
+        showError('生成分享链接失败：' + (error.message || '未知错误'));
     }
 }
+
+/**
+ * 提示用户输入唯一名称
+ * @returns {Promise<string>} - 用户输入的唯一名称
+ */
+function promptForUniqueName() {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="isolated-challenge-content">
+                <h3>隔离分享</h3>
+                <div>
+                    <label for="unique-name">唯一值:</label>
+                    <input type="text" id="unique-name" placeholder="请输入unique_name">
+                </div>
+                <div class="isolated-challenge-buttons">
+                    <button onclick="submitUniqueName()">确定</button>
+                    <button onclick="closeModal()">取消</button>
+                </div>
+            </div>
+        `;
+        modal.onclick = () => {
+            closeModal();
+            resolve(null);
+        };
+        modal.querySelector('.isolated-challenge-content').onclick = (e) => e.stopPropagation();
+        document.body.appendChild(modal);
+
+        window.submitUniqueName = () => {
+            const uniqueName = document.getElementById('unique-name').value.trim();
+            if (uniqueName) {
+                closeModal();
+                resolve(uniqueName);
+            } else {
+                showError('请输入有效的唯一名称');
+            }
+        };
+    });
+}
+
+// /**
+//  * 显示分享链接模态框
+//  * @param {string} shareLink - 分享链接
+//  */
+// function showShareLinkModal(shareLink) {
+//     const modal = document.createElement('div');
+//     modal.className = 'modal';
+//     modal.innerHTML = `
+//         <div class="modal-content">
+//             <h3>分享链接</h3>
+//             <div class="share-link-container">
+//                 <input type="text" id="share-link-input" value="${shareLink}" readonly>
+//                 <button onclick="copyShareLink()"><i class="fas fa-copy"></i> 复制</button>
+//             </div>
+//         </div>
+//     `;
+//     modal.onclick = closeModal;
+//     modal.querySelector('.modal-content').onclick = (e) => e.stopPropagation();
+//     document.body.appendChild(modal);
+// }
+
+// /**
+//  * 复制分享链接到剪贴板
+//  */
+// function copyShareLink() {
+//     const shareLinkInput = document.getElementById('share-link-input');
+//     shareLinkInput.select();
+//     document.execCommand('copy');
+//     showSuccess('链接已复制到剪贴板');
+// }
+
+
+/**
+ * 显示分享链接模态框
+ * @param {string} shareLink - 分享链接
+ */
+function showShareLinkModal(shareLink) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>分享链接</h3>
+            <div class="share-link-container">
+                <input type="text" id="share-link-input" value="${shareLink}" readonly>
+                <button onclick="copyShareLink()"><i class="fas fa-copy"></i> 复制</button>
+            </div>
+            <p class="validity-notice">注意：此链接的有效期为30分钟。</p>
+        </div>
+    `;
+    modal.onclick = closeModal;
+    modal.querySelector('.modal-content').onclick = (e) => e.stopPropagation();
+    document.body.appendChild(modal);
+}
+
+/**
+ * 复制分享链接到剪贴板
+ */
+function copyShareLink() {
+    const shareLinkInput = document.getElementById('share-link-input');
+    shareLinkInput.select();
+    document.execCommand('copy');
+    showSuccess('链接已复制到剪贴板，有效期为30分钟');
+}
+
 
 /**
  * 执行隔离跳转
@@ -376,11 +535,9 @@ async function executeIsolatedChallenge(sessionKeyId) {
             unique_name: uniqueName
         });
         
-        console.log('Isolated Challenge Response:', response);
-
         if (response && response.login_url) {
             window.open(response.login_url, '_blank');
-            closeIsolatedChallengeModal();
+            closeModal();
         } else {
             throw new Error('响应中没有包含 login_url');
         }
@@ -395,7 +552,7 @@ async function executeIsolatedChallenge(sessionKeyId) {
  */
 function openSettings() {
     const settingsHtml = `
-        <div id="settings-modal">
+        <div id="settings-modal" class="modal">
             <div class="settings-content">
                 <h3>设置</h3>
                 <div>
@@ -412,12 +569,15 @@ function openSettings() {
                 </div>
                 <div class="settings-buttons">
                     <button onclick="saveSettings()">保存</button>
-                    <button onclick="closeSettings()">取消</button>
+                    <button onclick="closeModal()">取消</button>
                 </div>
             </div>
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', settingsHtml);
+    const modal = document.getElementById('settings-modal');
+    modal.onclick = closeModal;
+    modal.querySelector('.settings-content').onclick = (e) => e.stopPropagation();
 }
 
 /**
@@ -436,20 +596,10 @@ function saveSettings() {
         localStorage.setItem('BASE_URL', BASE_URL);
         localStorage.setItem('AUTH_TOKEN', AUTH_TOKEN);
         showSuccess('设置已保存');
-        closeSettings();
+        closeModal();
         fetchSessionKeys(); // 刷新数据
     } else {
         showError('请填写所有字段');
-    }
-}
-
-/**
- * 关闭设置模态框
- */
-function closeSettings() {
-    const modal = document.getElementById('settings-modal');
-    if (modal) {
-        modal.parentNode.removeChild(modal);
     }
 }
 

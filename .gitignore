@@ -6,7 +6,7 @@ node_modules/
 build/
 
 # 忽略特定文件
-./database
+database
 
 # 忽略 Mac 系统生成的文件
 .DS_Store
