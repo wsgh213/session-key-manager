@@ -286,7 +286,9 @@ td:hover::after {
 .settings-buttons,
 .isolated-challenge-buttons,
 .modal-buttons {
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
     margin-top: 20px;
 }
 
@@ -344,6 +346,22 @@ td:hover::after {
     background-color: var(--success-color);
 }
 
+.btn-danger {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.delete-confirm-modal .modal-content {
+    text-align: center;
+}
+
+.delete-confirm-modal .modal-buttons {
+    justify-content: center;
+}
 /* 模态框样式 */
 .modal {
     position: fixed;
@@ -499,15 +517,6 @@ td:hover::after {
     justify-content: center;
     align-items: center;
     z-index: 1000;
-}
-
-.fade-in {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
 }
 
 .modal-content {

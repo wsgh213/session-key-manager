@@ -251,14 +251,14 @@ async function handleToggleStatus(id, newStatus) {
  */
 function handleDeleteSessionKey(id) {
     const modal = document.createElement('div');
-    modal.className = 'modal';
+    modal.className = 'modal delete-confirm-modal';
     modal.innerHTML = `
         <div class="modal-content">
-            <h3>确认删除</h3>
+            <h3 class="modal-title">确认删除</h3>
             <p>您确定要删除这个Session Key吗？此操作不可撤销。</p>
             <div class="modal-buttons">
-                <button onclick="confirmDeleteSessionKey(${id})">确认</button>
-                <button onclick="closeModal()">取消</button>
+                <button class="btn btn-danger" onclick="confirmDeleteSessionKey(${id})">确认</button>
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
             </div>
         </div>
     `;
