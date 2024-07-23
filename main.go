@@ -287,6 +287,7 @@ type OAuthRequest struct {
 	SessionKeyID uint   `json:"session_key_id" binding:"required"`
 	BaseURL      string `json:"base_url" binding:"required"`
 	UniqueName   string `json:"unique_name"`
+	ExpiresIn    uint64 `json:"expires_in"`
 }
 
 // OAuthResponse 结构体定义了OAuth响应的结构
@@ -317,9 +318,9 @@ func getOAuthToken(c *gin.Context) {
 	// 准备请求体
 	var requestBody string
 	if request.UniqueName == "" {
-		requestBody = fmt.Sprintf(`{"session_key": "%s"}`, sessionKey.Key)
+		requestBody = fmt.Sprintf(`{"session_key": "%s", "expires_in": %d}}`, sessionKey.Key, request.ExpiresIn)
 	} else {
-		requestBody = fmt.Sprintf(`{"session_key": "%s", "unique_name": "%s"}`, sessionKey.Key, request.UniqueName)
+		requestBody = fmt.Sprintf(`{"session_key": "%s", "unique_name": "%s", "expires_in": %d}`, sessionKey.Key, request.UniqueName, request.ExpiresIn)
 	}
 
 	// 向外部API发送请求

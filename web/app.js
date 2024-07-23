@@ -1,5 +1,5 @@
 // 全局变量
-let API_URL = localStorage.getItem('API_URL') || 'http://localhost:8080/api/v1';
+const API_URL = 'http://localhost:8080/api/v1'; // 直接在这里设置API_URL
 let BASE_URL = localStorage.getItem('BASE_URL') || 'https://demo.fuclaude.com';
 let AUTH_TOKEN = localStorage.getItem('AUTH_TOKEN') || '';
 
@@ -88,7 +88,6 @@ async function apiRequest(method, url, data = null) {
         }
     }
 }
-
 /**
  * 路由函数
  * @param {string} route - 路由名称
@@ -354,6 +353,17 @@ async function handleIsolatedChallenge(sessionKeyId, isActive) {
 }
 
 /**
+ * 将日期时间转换为秒数
+ * @param {string} dateString - 日期时间字符串
+ * @returns {number} - 从现在到指定日期时间的秒数
+ */
+function dateToSeconds(dateString) {
+    const selectedDate = new Date(dateString);
+    const now = new Date();
+    return Math.floor((selectedDate - now) / 1000);
+}
+
+/**
  * 处理分享
  * @param {number} sessionKeyId - Session Key ID
  * @param {boolean} isActive - Session Key是否激活
@@ -370,8 +380,8 @@ function handleShare(sessionKeyId, isActive) {
         <div class="modal-content">
             <h3>选择分享类型</h3>
             <div class="share-options">
-                <button onclick="generateShareLink(${sessionKeyId}, 'normal')">普通分享</button>
-                <button onclick="generateShareLink(${sessionKeyId}, 'isolated')">隔离分享</button>
+                <button onclick="handleNormalShare(${sessionKeyId})">普通分享</button>
+                <button onclick="handleIsolatedShare(${sessionKeyId})">隔离分享</button>
             </div>
         </div>
     `;
@@ -381,28 +391,198 @@ function handleShare(sessionKeyId, isActive) {
 }
 
 /**
+ * 处理普通分享
+ * @param {number} sessionKeyId - Session Key ID
+ */
+function handleNormalShare(sessionKeyId) {
+    closeModal();
+    showExpirationModal(sessionKeyId, 'normal');
+}
+
+/**
+ * 处理隔离分享
+ * @param {number} sessionKeyId - Session Key ID
+ */
+function handleIsolatedShare(sessionKeyId) {
+    closeModal();
+    showExpirationModal(sessionKeyId, 'isolated');
+}
+
+
+/**
+ * 显示过期时间设置模态框
+ * @param {number} sessionKeyId - Session Key ID
+ * @param {string} shareType - 分享类型
+ */
+function showExpirationModal(sessionKeyId, shareType) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>设置过期时间</h3>
+            <div class="expiration-setting">
+                <label for="expiration-datetime">过期时间：</label>
+                <input type="datetime-local" id="expiration-datetime">
+            </div>
+            <div class="modal-buttons">
+                <button onclick="generateShareLink(${sessionKeyId}, '${shareType}')">确定</button>
+                <button onclick="generateShareLink(${sessionKeyId}, '${shareType}', true)">不设置过期时间</button>
+                <button onclick="closeModal()">取消</button>
+            </div>
+        </div>
+    `;
+    modal.onclick = closeModal;
+    modal.querySelector('.modal-content').onclick = (e) => e.stopPropagation();
+    document.body.appendChild(modal);
+}
+
+/**
+ * 显示隔离分享模态框
+ * @param {number} sessionKeyId - Session Key ID
+ */
+function showIsolatedShareModal(sessionKeyId) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>隔离分享</h3>
+            <div>
+                <label for="unique-name">唯一值:</label>
+                <input type="text" id="unique-name" placeholder="请输入unique_name">
+            </div>
+            <div class="expiration-setting">
+                <label for="isolated-expiration-datetime">过期时间：</label>
+                <input type="datetime-local" id="isolated-expiration-datetime">
+            </div>
+            <div class="modal-buttons">
+                <button onclick="handleIsolatedShareSubmit(${sessionKeyId})">确定</button>
+                <button onclick="closeModal()">取消</button>
+            </div>
+        </div>
+    `;
+    modal.onclick = closeModal;
+    modal.querySelector('.modal-content').onclick = (e) => e.stopPropagation();
+    document.body.appendChild(modal);
+}
+
+/**
+ * 处理隔离分享提交
+ * @param {number} sessionKeyId - Session Key ID
+ */
+function handleIsolatedShareSubmit(sessionKeyId) {
+    const uniqueName = document.getElementById('unique-name').value.trim();
+    const expirationDatetime = document.getElementById('isolated-expiration-datetime').value;
+    let expirationSeconds = 0;
+
+    if (expirationDatetime) {
+        expirationSeconds = dateToSeconds(expirationDatetime);
+    }
+
+    if (uniqueName) {
+        closeModal();
+        generateShareLink(sessionKeyId, 'isolated', false, uniqueName, expirationSeconds);
+    } else {
+        showError('请输入有效的唯一名称');
+    }
+}
+
+/**
+ * 显示过期时间设置模态框
+ * @param {number} sessionKeyId - Session Key ID
+ * @param {string} shareType - 分享类型
+ */
+function showExpirationModal(sessionKeyId, shareType) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade-in';
+    modal.innerHTML = `
+        <div class="modal-content expiration-modal">
+            <h3 class="modal-title">${shareType === 'isolated' ? '隔离分享' : '设置过期时间'}</h3>
+            ${shareType === 'isolated' ? `
+            <div class="isolated-share-input">
+                <label for="unique-name">唯一值:</label>
+                <input type="text" id="unique-name" placeholder="请输入unique_name">
+            </div>
+            ` : ''}
+            <div class="expiration-options">
+                <div class="expiration-option">
+                    <input type="radio" id="no-expiration" name="expiration-type" value="no-expiration" checked>
+                    <label for="no-expiration">永不过期</label>
+                </div>
+                <div class="expiration-option">
+                    <input type="radio" id="custom-expiration" name="expiration-type" value="custom-expiration">
+                    <label for="custom-expiration">自定义过期时间</label>
+                </div>
+            </div>
+            <div id="custom-expiration-inputs" class="custom-expiration-inputs hidden">
+                <input type="datetime-local" id="expiration-datetime">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="generateShareLink(${sessionKeyId}, '${shareType}')">确定</button>
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+            </div>
+        </div>
+    `;
+    modal.onclick = closeModal;
+    modal.querySelector('.modal-content').onclick = (e) => e.stopPropagation();
+    document.body.appendChild(modal);
+
+    // 添加事件监听器以显示/隐藏自定义过期时间输入
+    const customExpirationInputs = document.getElementById('custom-expiration-inputs');
+    document.querySelectorAll('input[name="expiration-type"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'custom-expiration') {
+                customExpirationInputs.classList.remove('hidden');
+            } else {
+                customExpirationInputs.classList.add('hidden');
+            }
+        });
+    });
+
+    // 设置最小日期时间为当前时间
+    const datetimeInput = document.getElementById('expiration-datetime');
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    datetimeInput.min = now.toISOString().slice(0, 16);
+}
+
+/**
  * 生成分享链接
  * @param {number} sessionKeyId - Session Key ID
  * @param {string} shareType - 分享类型 ('normal' 或 'isolated')
  */
 async function generateShareLink(sessionKeyId, shareType) {
-    closeModal();
+    let expirationSeconds = 0;
+    const expirationType = document.querySelector('input[name="expiration-type"]:checked').value;
+
+    if (expirationType === 'custom-expiration') {
+        const expirationDatetime = document.getElementById('expiration-datetime').value;
+        if (expirationDatetime) {
+            expirationSeconds = dateToSeconds(expirationDatetime);
+        } else {
+            showError('请选择有效的过期时间');
+            return;
+        }
+    }
 
     let uniqueName = '';
     if (shareType === 'isolated') {
-        uniqueName = await promptForUniqueName();
-        if (!uniqueName) return; // 用户取消了操作
+        uniqueName = document.getElementById('unique-name').value.trim();
+        if (!uniqueName) {
+            showError('请输入有效的唯一名称');
+            return;
+        }
     }
 
     try {
         const response = await apiRequest('post', '/auth/oauth_token', {
             session_key_id: sessionKeyId,
             base_url: BASE_URL,
+            expires_in: expirationSeconds,
             ...(shareType === 'isolated' && { unique_name: uniqueName })
         });
 
         if (response && response.login_url) {
-            showShareLinkModal(response.login_url);
+            showShareLinkModal(response.login_url, expirationSeconds);
         } else {
             throw new Error('响应中没有包含 login_url');
         }
@@ -410,54 +590,20 @@ async function generateShareLink(sessionKeyId, shareType) {
         console.error('Share link generation error:', error);
         showError('生成分享链接失败：' + (error.message || '未知错误'));
     }
+
+    closeModal();
 }
-
-/**
- * 提示用户输入唯一名称
- * @returns {Promise<string>} - 用户输入的唯一名称
- */
-function promptForUniqueName() {
-    return new Promise((resolve) => {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="isolated-challenge-content">
-                <h3>隔离分享</h3>
-                <div>
-                    <label for="unique-name">唯一值:</label>
-                    <input type="text" id="unique-name" placeholder="请输入unique_name">
-                </div>
-                <div class="isolated-challenge-buttons">
-                    <button onclick="submitUniqueName()">确定</button>
-                    <button onclick="closeModal()">取消</button>
-                </div>
-            </div>
-        `;
-        modal.onclick = () => {
-            closeModal();
-            resolve(null);
-        };
-        modal.querySelector('.isolated-challenge-content').onclick = (e) => e.stopPropagation();
-        document.body.appendChild(modal);
-
-        window.submitUniqueName = () => {
-            const uniqueName = document.getElementById('unique-name').value.trim();
-            if (uniqueName) {
-                closeModal();
-                resolve(uniqueName);
-            } else {
-                showError('请输入有效的唯一名称');
-            }
-        };
-    });
-}
-
 
 /**
  * 显示分享链接模态框
  * @param {string} shareLink - 分享链接
+ * @param {number} expirationSeconds - 过期时间（秒）
  */
-function showShareLinkModal(shareLink) {
+function showShareLinkModal(shareLink, expirationSeconds) {
+    const expirationText = expirationSeconds > 0 
+        ? `链接将在 ${Math.floor(expirationSeconds / 3600)} 小时 ${Math.floor((expirationSeconds % 3600) / 60)} 分钟后过期。`
+        : '此链接没有设置过期时间。';
+
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `
@@ -467,7 +613,7 @@ function showShareLinkModal(shareLink) {
                 <input type="text" id="share-link-input" value="${shareLink}" readonly>
                 <button onclick="copyShareLink()"><i class="fas fa-copy"></i> 复制</button>
             </div>
-            <p class="validity-notice">注意：此链接的有效期为30分钟。</p>
+            <p class="validity-notice">${expirationText}</p>
         </div>
     `;
     modal.onclick = closeModal;
@@ -480,9 +626,30 @@ function showShareLinkModal(shareLink) {
  */
 function copyShareLink() {
     const shareLinkInput = document.getElementById('share-link-input');
-    shareLinkInput.select();
-    document.execCommand('copy');
-    showSuccess('链接已复制到剪贴板，有效期为30分钟');
+    
+    if (navigator.clipboard && window.isSecureContext) {
+        // 使用现代的 Clipboard API
+        navigator.clipboard.writeText(shareLinkInput.value).then(() => {
+            showSuccess('链接已复制到剪贴板');
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            showError('复制失败，请手动复制链接');
+        });
+    } else {
+        // 回退到旧方法
+        shareLinkInput.select();
+        try {
+            var successful = document.execCommand('copy');
+            if (successful) {
+                showSuccess('链接已复制到剪贴板');
+            } else {
+                showError('复制失败，请手动复制链接');
+            }
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            showError('复制失败，请手动复制链接');
+        }
+    }
 }
 
 
@@ -525,10 +692,6 @@ function openSettings() {
             <div class="settings-content">
                 <h3>设置</h3>
                 <div>
-                    <label for="api-url">API URL:</label>
-                    <input type="text" id="api-url" value="${API_URL}">
-                </div>
-                <div>
                     <label for="base-url">BASE URL:</label>
                     <input type="text" id="base-url" value="${BASE_URL}">
                 </div>
@@ -545,23 +708,23 @@ function openSettings() {
     `;
     document.body.insertAdjacentHTML('beforeend', settingsHtml);
     const modal = document.getElementById('settings-modal');
-    modal.onclick = closeModal;
-    modal.querySelector('.settings-content').onclick = (e) => e.stopPropagation();
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
 }
 
 /**
  * 保存设置
  */
 function saveSettings() {
-    const newApiUrl = document.getElementById('api-url').value;
     const newBaseUrl = document.getElementById('base-url').value;
     const newAuthToken = document.getElementById('auth-token').value;
 
-    if (newApiUrl && newBaseUrl) {
-        API_URL = newApiUrl;
+    if (newBaseUrl) {
         BASE_URL = newBaseUrl;
         AUTH_TOKEN = newAuthToken;
-        localStorage.setItem('API_URL', API_URL);
         localStorage.setItem('BASE_URL', BASE_URL);
         localStorage.setItem('AUTH_TOKEN', AUTH_TOKEN);
         showSuccess('设置已保存');
