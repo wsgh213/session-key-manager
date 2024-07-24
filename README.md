@@ -12,7 +12,7 @@ Session Key Manager 是一个用于管理会话密钥的web应用程序。它提
 3. 更新会话密钥状态（激活/停用）
 4. 删除会话密钥
 5. 使用会话密钥进行身份验证跳转
-6. 支持隔离挑战模式的跳转
+6. 支持隔离跳转模式的跳转
 7. 支持分享功能
 
 ## 技术栈
@@ -64,6 +64,9 @@ AUTH_TOKEN=your_auth_token_here
 
 2. 打开浏览器访问 `http://localhost:8080`
 
+## 前端
+[前端配置](./web/README.md)
+
 ## 使用说明
 
 1. 创建会话密钥：
@@ -82,63 +85,17 @@ AUTH_TOKEN=your_auth_token_here
 5. 身份验证跳转：
    - 点击激活状态的会话密钥旁边的"跳转"按钮
 
-6. 隔离挑战模式跳转：
+6. 隔离跳转模式跳转：
    - 点击激活状态的会话密钥旁边的"隔离跳转"按钮
    - 在弹出的模态框中输入唯一标识符
 
+7. 分享功能：
+   - 点击激活状态的会话密钥旁边的"分享"按钮
+   - 在弹出的模态框中选择分享类型
+   - 根据分享类型设置过期时间(非必须)和唯一标识
+
 ## API 文档
-
-### 创建会话密钥
-- 方法：POST
-- 路径：/api/v1/sessionkeys
-- 请求体：
-  ```json
-  {
-    "key": "your_key",
-    "code": "your_code",
-    "status": true
-  }
-  ```
-
-### 获取所有会话密钥
-- 方法：GET
-- 路径：/api/v1/sessionkeys
-
-### 获取单个会话密钥
-- 方法：GET
-- 路径：/api/v1/sessionkeys/:id
-
-### 更新会话密钥
-- 方法：PUT
-- 路径：/api/v1/sessionkeys/:id
-- 请求体：
-  ```json
-  {
-    "status": false
-  }
-  ```
-
-### 删除会话密钥
-- 方法：DELETE
-- 路径：/api/v1/sessionkeys/:id
-
-### 获取OAuth令牌
-- 方法：POST
-- 路径：/api/v1/auth/oauth_token
-- 请求体：
-  ```json
-  {
-    "session_key_id": 1,
-    "base_url": "https://your-base-url.com",
-    "unique_name": "optional_unique_identifier"
-  }
-  ```
-
-## 注意事项
-
-- 确保在生产环境中更改默认的认证令牌。
-- 定期备份数据库文件。
-- 在生产环境中，建议使用更安全的数据库系统，如PostgreSQL或MySQL。
+[api文档](./api-documentation.md)
 
 ## 贡献
 

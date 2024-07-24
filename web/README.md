@@ -27,7 +27,7 @@ Session Key Manager的前端是一个使用原生HTML、CSS和JavaScript构建�
 4. 删除会话密钥
 5. 使用会话密钥进行身份验证跳转
 6. 支持隔离挑战模式的跳转
-7. 设置管理（API URL, BASE URL, 认证令牌）
+7. 设置管理（BASE URL, 认证令牌）
 
 ## 技术细节
 
@@ -64,7 +64,7 @@ Session Key Manager的前端是一个使用原生HTML、CSS和JavaScript构建�
 
 ## 使用方法
 
-1. 打开 `index.html` 文件，应用将自动加载。
+1. 在app.js中设置API_URL地址，打开 `index.html` 文件，应用将自动加载。
 2. 使用顶部的表单创建新的会话密钥。
 3. 在表格中查看所有会话密钥。
 4. 使用表格中的按钮执行各种操作（激活/停用、删除、跳转等）。
@@ -85,7 +85,7 @@ Session Key Manager的前端是一个使用原生HTML、CSS和JavaScript构建�
 
 ## 安全考虑
 
-1. 避免在前端存储敏感信息。当前，API URL、BASE URL和认证令牌存储在localStorage中，在生产环境中应考虑更安全的存储方式。
+1. 避免在前端存储敏感信息。当前，BASE URL和认证令牌存储在localStorage中，在生产环境中应考虑更安全的存储方式。
 2. 所有的用户输入都应该在前端和后端都进行验证和清理。
 
 ## 性能优化
